@@ -1,11 +1,8 @@
 ﻿using Azure.Core;
 using Azure.Identity;
 using learn_azure_webapp.DataModels;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
-using System.Data.Common;
 
 namespace learn_azure_webapp.Pages
 {
