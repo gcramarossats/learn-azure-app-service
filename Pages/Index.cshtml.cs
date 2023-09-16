@@ -70,7 +70,7 @@ namespace learn_azure_webapp.Pages
                             {
                                 AccessToken token = defaultAzureCredential.GetToken(new TokenRequestContext(new[] { Environment.GetEnvironmentVariable("APPLICATION_CORE_DBCONTEXTURL") }));
                                 connection.AccessToken = token.Token;
-                                _logger.LogError("The managed identity has been set successfully. Connecting with the selected managed identity");
+                                _logger.LogInformation("The managed identity has been set successfully. Connecting with the selected managed identity");
                             }
                             else
                             {
