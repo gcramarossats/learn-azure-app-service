@@ -1,4 +1,4 @@
-# learn-azure-webapp
+# learn-azure-app-service
 A simple application that has been developed in order to demonstrate how to use Azure App service with a database and manged identities.
 
 With this simple application it is possible to:
