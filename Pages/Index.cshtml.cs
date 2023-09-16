@@ -1,7 +1,10 @@
-﻿using learn_azure_webapp.DataModels;
+﻿using Azure.Core;
+using Azure.Identity;
+using learn_azure_webapp.DataModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using System.Data.Common;
 
 namespace learn_azure_webapp.Pages
@@ -51,6 +54,36 @@ namespace learn_azure_webapp.Pages
                     using (SqlConnection connection = new SqlConnection(connectionString))
                     {
                         SqlCommand command = new SqlCommand("SELECT * FROM capitalcities", connection);
+                        if (Environment.GetEnvironmentVariable("APPLICATION_CORE_MANAGEDIDENTITYCLIENTID") != null)
+                        {
+                            string managedIdentityClientId = Environment.GetEnvironmentVariable("APPLICATION_CORE_MANAGEDIDENTITYCLIENTID");
+                            DefaultAzureCredential defaultAzureCredential;
+                            if (managedIdentityClientId.Trim() == "")
+                            {
+                                defaultAzureCredential = new DefaultAzureCredential();
+                                _logger.LogInformation("Using the system assigned Azure managed identity of the application");
+                            }
+                            else
+                            {
+                                defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ManagedIdentityClientId = managedIdentityClientId });
+                                _logger.LogInformation("Using the user assigned Azure managed identity with client id" + managedIdentityClientId);
+                            }
+
+                            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATION_CORE_DBCONTEXTURL")))
+                            {
+                                AccessToken token = defaultAzureCredential.GetToken(new TokenRequestContext(new[] { Environment.GetEnvironmentVariable("APPLICATION_CORE_DBCONTEXTURL") }));
+                                connection.AccessToken = token.Token;
+                                _logger.LogError("The managed identity has been set successfully. Connecting with the selected managed identity");
+                            }
+                            else
+                            {
+                                _logger.LogError("APPLICATION_CORE_DBCONTEXTURL environment variable not set. You need to set this environment variable in order to get an acess token that can be used for the chosen database");
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogInformation("To connect to the database using a managed identity, set the APPLICATION_CORE_MANAGEDIDENTITYCLIENTID environment variable");
+                        }
                         connection.Open();
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
